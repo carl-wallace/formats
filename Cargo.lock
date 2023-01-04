@@ -216,6 +216,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "cms"
+version = "0.1.0"
+dependencies = [
+ "const-oid",
+ "der",
+ "flagset",
+ "hex-literal",
+ "rstest 0.12.0",
+ "spki",
+ "x509-cert",
+]
+
+[[package]]
 name = "const-oid"
 version = "0.10.0-pre"
 dependencies = [
@@ -817,6 +830,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eb9f9e6e233e5c4a35559a617bf40a4ec447db2e84c20b55a6f83167b7e57872"
 
 [[package]]
+name = "pqckeys"
+version = "0.1.0"
+dependencies = [
+ "cms",
+ "const-oid",
+ "der",
+ "flagset",
+ "hex-literal",
+ "rstest 0.12.0",
+ "spki",
+ "x509-cert",
+]
+
+[[package]]
 name = "proc-macro-error"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -984,6 +1011,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3acd125665422973a33ac9d3dd2df85edad0f4ae9b00dafb1a05e43a9f5ef8e7"
 dependencies = [
  "winapi",
+]
+
+[[package]]
+name = "rstest"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d912f35156a3f99a66ee3e11ac2e0b3f34ac85a07e05263d05a7e2c8810d616f"
+dependencies = [
+ "cfg-if",
+ "proc-macro2",
+ "quote",
+ "rustc_version",
+ "syn",
 ]
 
 [[package]]
@@ -1465,7 +1505,7 @@ dependencies = [
  "der",
  "flagset",
  "hex-literal",
- "rstest",
+ "rstest 0.16.0",
  "spki",
 ]
 
