@@ -35,7 +35,7 @@ impl_newtype!(
 #[derive(Clone, Debug, Eq, PartialEq, Choice)]
 #[allow(missing_docs)]
 pub enum RevocationInfoChoice<'a> {
-    Crl(CertificateList<'a>),
+    Crl(CertificateList),
     #[asn1(context_specific = "1", tag_mode = "IMPLICIT", constructed = "true")]
     Other(OtherRevocationInfoFormat<'a>),
 }
