@@ -2,10 +2,10 @@
 use core::cmp::Ordering;
 
 use const_oid::ObjectIdentifier;
-use der::asn1::UintRef;
-use der::{AnyRef, Choice, Sequence, ValueOrd};
+use der::{Any, Choice, Sequence, ValueOrd};
 
 use x509_cert::name::Name;
+use x509_cert::serial_number::SerialNumber;
 use x509_cert::Certificate;
 
 /// The `CertificateChoices` type is defined in [RFC 5652 Section 10.2.2]. Attribute certificate
@@ -26,15 +26,16 @@ use x509_cert::Certificate;
 /// [RFC 5652 Section 10.2.2]: https://www.rfc-editor.org/rfc/rfc5652#section-10.2.2
 #[derive(Clone, Debug, Eq, PartialEq, Choice)]
 #[allow(missing_docs)]
-pub enum CertificateChoices<'a> {
+#[allow(clippy::large_enum_variant)]
+pub enum CertificateChoices {
     Certificate(Certificate),
     #[asn1(context_specific = "3", tag_mode = "EXPLICIT", constructed = "true")]
-    Other(OtherCertificateFormat<'a>),
+    Other(OtherCertificateFormat),
     // TODO DEFER add more choices if desired (i.e., AttributeCertificateV2)
 }
 
 // TODO DEFER ValueOrd is not supported for CHOICE types (see new_enum in value_ord.rs)
-impl ValueOrd for CertificateChoices<'_> {
+impl ValueOrd for CertificateChoices {
     fn value_cmp(&self, other: &Self) -> der::Result<Ordering> {
         use der::DerOrd;
         use der::Encode;
@@ -58,9 +59,9 @@ impl ValueOrd for CertificateChoices<'_> {
 /// [RFC 5652 Section 10.2.2]: https://www.rfc-editor.org/rfc/rfc5652#section-10.2.2
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
-pub struct OtherCertificateFormat<'a> {
+pub struct OtherCertificateFormat {
     pub other_cert_format: ObjectIdentifier,
-    pub other_cert: AnyRef<'a>,
+    pub other_cert: Any,
 }
 
 /// IssuerAndSerialNumber structure as defined in [RFC 5652 Section 10.2.4].
@@ -74,7 +75,7 @@ pub struct OtherCertificateFormat<'a> {
 /// [RFC 5652 Section 10.2.4]: https://datatracker.ietf.org/doc/html/rfc5652#section-10.2.4
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
-pub struct IssuerAndSerialNumber<'a> {
+pub struct IssuerAndSerialNumber {
     pub issuer: Name,
-    pub serial_number: UintRef<'a>,
+    pub serial_number: SerialNumber,
 }

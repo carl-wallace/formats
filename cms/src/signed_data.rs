@@ -3,9 +3,9 @@
 use core::cmp::Ordering;
 
 use const_oid::ObjectIdentifier;
-use der::asn1::OctetStringRef;
+use der::asn1::OctetString;
 use der::asn1::SetOfVec;
-use der::{AnyRef, Choice, DerOrd, Sequence, ValueOrd};
+use der::{Any, Choice, DerOrd, Sequence, ValueOrd};
 use spki::AlgorithmIdentifierOwned;
 use x509_cert::attr::Attributes;
 use x509_cert::ext::pkix::SubjectKeyIdentifier;
@@ -30,15 +30,16 @@ use crate::revocation::RevocationInfoChoices;
 /// [RFC 5652 Section 5.1]: https://www.rfc-editor.org/rfc/rfc5652#section-5.1
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
-pub struct SignedData<'a> {
+pub struct SignedData {
     pub version: CmsVersion,
-    pub digest_algorithms: DigestAlgorithmIdentifiers<'a>,
-    pub encap_content_info: EncapsulatedContentInfo<'a>,
+    pub digest_algorithms: DigestAlgorithmIdentifiers,
+    pub encap_content_info: EncapsulatedContentInfo,
+    //todo consider defer decoding certs and CRLs
     #[asn1(context_specific = "0", tag_mode = "IMPLICIT", optional = "true")]
-    pub certificates: Option<CertificateSet<'a>>,
+    pub certificates: Option<CertificateSet>,
     #[asn1(context_specific = "1", tag_mode = "IMPLICIT", optional = "true")]
-    pub crls: Option<RevocationInfoChoices<'a>>,
-    pub signer_infos: SignerInfos<'a>,
+    pub crls: Option<RevocationInfoChoices>,
+    pub signer_infos: SignerInfos,
 }
 
 /// The `DigestAlgorithmIdentifiers` type is defined in [RFC 5652 Section 5.1].
@@ -48,7 +49,7 @@ pub struct SignedData<'a> {
 /// ```
 ///
 /// [RFC 5652 Section 5.1]: https://datatracker.ietf.org/doc/html/rfc5652#section-5.1
-pub type DigestAlgorithmIdentifiers<'a> = SetOfVec<AlgorithmIdentifierOwned>;
+pub type DigestAlgorithmIdentifiers = SetOfVec<AlgorithmIdentifierOwned>;
 
 /// CertificateSet structure as defined in [RFC 5652 Section 10.2.3].
 ///
@@ -58,8 +59,8 @@ pub type DigestAlgorithmIdentifiers<'a> = SetOfVec<AlgorithmIdentifierOwned>;
 ///
 /// [RFC 5652 Section 10.2.3]: https://datatracker.ietf.org/doc/html/rfc5652#section-10.2.3
 #[derive(Clone, Eq, PartialEq, Debug)]
-pub struct CertificateSet<'a>(pub SetOfVec<CertificateChoices<'a>>);
-impl_newtype!(CertificateSet<'a>, SetOfVec<CertificateChoices<'a>>);
+pub struct CertificateSet(pub SetOfVec<CertificateChoices>);
+impl_newtype!(CertificateSet, SetOfVec<CertificateChoices>);
 
 /// The `SignerInfos` type is defined in [RFC 5652 Section 5.1].
 ///
@@ -69,8 +70,8 @@ impl_newtype!(CertificateSet<'a>, SetOfVec<CertificateChoices<'a>>);
 ///
 /// [RFC 5652 Section 5.1]: https://www.rfc-editor.org/rfc/rfc5652#section-5.1
 #[derive(Clone, Eq, PartialEq, Debug)]
-pub struct SignerInfos<'a>(pub SetOfVec<SignerInfo<'a>>);
-impl_newtype!(SignerInfos<'a>, SetOfVec<SignerInfo<'a>>);
+pub struct SignerInfos(pub SetOfVec<SignerInfo>);
+impl_newtype!(SignerInfos, SetOfVec<SignerInfo>);
 
 /// The `EncapsulatedContentInfo` type is defined in [RFC 5652 Section 5.2].
 ///
@@ -85,10 +86,10 @@ impl_newtype!(SignerInfos<'a>, SetOfVec<SignerInfo<'a>>);
 /// [RFC 5652 Section 5.2]: https://www.rfc-editor.org/rfc/rfc5652#section-5.2
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
-pub struct EncapsulatedContentInfo<'a> {
+pub struct EncapsulatedContentInfo {
     pub econtent_type: ObjectIdentifier,
     #[asn1(context_specific = "0", tag_mode = "EXPLICIT", optional = "true")]
-    pub econtent: Option<AnyRef<'a>>,
+    pub econtent: Option<Any>,
 }
 
 /// The `SignerInfo` type is defined in [RFC 5652 Section 5.3].
@@ -108,9 +109,9 @@ pub struct EncapsulatedContentInfo<'a> {
 /// [RFC 5652 Section 5.3]: https://www.rfc-editor.org/rfc/rfc5652#section-5.3
 #[derive(Clone, Debug, Eq, PartialEq, Sequence, ValueOrd)]
 #[allow(missing_docs)]
-pub struct SignerInfo<'a> {
+pub struct SignerInfo {
     pub version: CmsVersion,
-    pub sid: SignerIdentifier<'a>,
+    pub sid: SignerIdentifier,
     pub digest_alg: AlgorithmIdentifierOwned,
     #[asn1(
         context_specific = "0",
@@ -120,7 +121,7 @@ pub struct SignerInfo<'a> {
     )]
     pub signed_attrs: Option<SignedAttributes>,
     pub signature_algorithm: AlgorithmIdentifierOwned,
-    pub signature: SignatureValue<'a>,
+    pub signature: SignatureValue,
     #[asn1(
         context_specific = "1",
         tag_mode = "IMPLICIT",
@@ -150,15 +151,15 @@ pub type SignedAttributes = Attributes;
 /// [RFC 5652 Section 5.3]: https://datatracker.ietf.org/doc/html/rfc5652#section-5.3
 #[derive(Clone, Debug, Eq, PartialEq, Choice)]
 #[allow(missing_docs)]
-pub enum SignerIdentifier<'a> {
-    IssuerAndSerialNumber(IssuerAndSerialNumber<'a>),
+pub enum SignerIdentifier {
+    IssuerAndSerialNumber(IssuerAndSerialNumber),
 
     #[asn1(context_specific = "0", tag_mode = "EXPLICIT")]
     SubjectKeyIdentifier(SubjectKeyIdentifier),
 }
 
 // TODO DEFER ValueOrd is not supported for CHOICE types (see new_enum in value_ord.rs)
-impl ValueOrd for SignerIdentifier<'_> {
+impl ValueOrd for SignerIdentifier {
     fn value_cmp(&self, other: &Self) -> der::Result<Ordering> {
         use der::Encode;
         self.to_vec()?.der_cmp(&other.to_vec()?)
@@ -181,4 +182,4 @@ pub type UnsignedAttributes = Attributes;
 /// ```
 ///
 /// [RFC 5652 Section 5.3]: https://datatracker.ietf.org/doc/html/rfc5652#section-5.3
-pub type SignatureValue<'a> = OctetStringRef<'a>;
+pub type SignatureValue = OctetString;

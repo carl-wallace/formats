@@ -2,7 +2,7 @@
 use core::cmp::Ordering;
 
 use der::asn1::SetOfVec;
-use der::{AnyRef, Choice, Sequence, ValueOrd};
+use der::{Any, Choice, Sequence, ValueOrd};
 use spki::AlgorithmIdentifierOwned;
 
 use x509_cert::crl::CertificateList;
@@ -16,11 +16,8 @@ use x509_cert::impl_newtype;
 ///
 /// [RFC 5652 Section 10.2.1]: https://www.rfc-editor.org/rfc/rfc5652#section-10.2.1
 #[derive(Clone, Eq, PartialEq, Debug)]
-pub struct RevocationInfoChoices<'a>(pub SetOfVec<RevocationInfoChoice<'a>>);
-impl_newtype!(
-    RevocationInfoChoices<'a>,
-    SetOfVec<RevocationInfoChoice<'a>>
-);
+pub struct RevocationInfoChoices(pub SetOfVec<RevocationInfoChoice>);
+impl_newtype!(RevocationInfoChoices, SetOfVec<RevocationInfoChoice>);
 
 /// The `RevocationInfoChoice` type is defined in [RFC 5652 Section 10.2.1].
 ///
@@ -34,14 +31,15 @@ impl_newtype!(
 /// [RFC 5652 Section 10.2.1]: https://www.rfc-editor.org/rfc/rfc5652#section-10.2.1
 #[derive(Clone, Debug, Eq, PartialEq, Choice)]
 #[allow(missing_docs)]
-pub enum RevocationInfoChoice<'a> {
+#[allow(clippy::large_enum_variant)]
+pub enum RevocationInfoChoice {
     Crl(CertificateList),
     #[asn1(context_specific = "1", tag_mode = "IMPLICIT", constructed = "true")]
-    Other(OtherRevocationInfoFormat<'a>),
+    Other(OtherRevocationInfoFormat),
 }
 
 // TODO DEFER ValueOrd is not supported for CHOICE types (see new_enum in value_ord.rs)
-impl ValueOrd for RevocationInfoChoice<'_> {
+impl ValueOrd for RevocationInfoChoice {
     fn value_cmp(&self, other: &Self) -> der::Result<Ordering> {
         use der::DerOrd;
         use der::Encode;
@@ -62,7 +60,7 @@ impl ValueOrd for RevocationInfoChoice<'_> {
 /// [RFC 5652 Section 10.2.1]: https://www.rfc-editor.org/rfc/rfc5652#section-10.2.1
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
-pub struct OtherRevocationInfoFormat<'a> {
+pub struct OtherRevocationInfoFormat {
     pub other_format: AlgorithmIdentifierOwned,
-    pub other: AnyRef<'a>,
+    pub other: Any,
 }

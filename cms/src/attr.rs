@@ -30,4 +30,4 @@ pub type SigningTime = Time;
 /// ```
 ///
 /// [RFC 5652 Section 11.4]: https://www.rfc-editor.org/rfc/rfc5652#section-11.4
-pub type Countersignature<'a> = SignerInfo<'a>;
+pub type Countersignature = SignerInfo;

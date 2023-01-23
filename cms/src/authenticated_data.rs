@@ -28,7 +28,7 @@ use crate::signed_data::EncapsulatedContentInfo;
 /// [RFC 5652 Section 9.1]: https://www.rfc-editor.org/rfc/rfc5652#section-9.1
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
-pub struct AuthenticatedData<'a> {
+pub struct AuthenticatedData {
     pub version: CmsVersion,
     #[asn1(
         context_specific = "0",
@@ -36,17 +36,17 @@ pub struct AuthenticatedData<'a> {
         constructed = "true",
         optional = "true"
     )]
-    pub originator_info: Option<OriginatorInfo<'a>>,
-    pub recip_infos: RecipientInfos<'a>,
+    pub originator_info: Option<OriginatorInfo>,
+    pub recip_infos: RecipientInfos,
     pub mac_alg: AlgorithmIdentifierOwned,
     #[asn1(
         context_specific = "1",
-        tag_mode = "EXPLICIT",
+        tag_mode = "IMPLICIT",
         constructed = "true",
         optional = "true"
     )]
     pub digest_alg: Option<AlgorithmIdentifierOwned>,
-    pub encap_content_info: EncapsulatedContentInfo<'a>,
+    pub encap_content_info: EncapsulatedContentInfo,
     #[asn1(
         context_specific = "2",
         tag_mode = "IMPLICIT",
@@ -63,10 +63,10 @@ pub struct AuthenticatedData<'a> {
     )]
     pub unauth_attrs: Option<Attributes>,
 }
-//// The `MessageAuthenticationCode` type is defined in [RFC 5652 Section 9.1].
+/// The `MessageAuthenticationCode` type is defined in [RFC 5652 Section 9.1].
 ///
 /// ```text
-//   MessageAuthenticationCode ::= OCTET STRING
+///   MessageAuthenticationCode ::= OCTET STRING
 /// ```
 ///
 /// [RFC 5652 Section 9.1]: https://www.rfc-editor.org/rfc/rfc5652#section-9.1

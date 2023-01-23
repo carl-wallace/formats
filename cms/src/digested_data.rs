@@ -1,6 +1,5 @@
 //! DigestedData-related types
-use der::asn1::OctetString;
-use der::Sequence;
+use der::{asn1::OctetString, Sequence};
 
 use spki::AlgorithmIdentifierOwned;
 
@@ -14,16 +13,17 @@ use crate::signed_data::EncapsulatedContentInfo;
 ///       version CMSVersion,
 ///       digestAlgorithm DigestAlgorithmIdentifier,
 ///       encapContentInfo EncapsulatedContentInfo,
-///       digest Digest, ... }
+///       digest Digest
+///   }
 /// ```
 ///
 /// [RFC 5652 Section 7]: https://www.rfc-editor.org/rfc/rfc5652#section-7
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
-pub struct DigestedData<'a> {
+pub struct DigestedData {
     pub version: CmsVersion,
     pub digest_alg: AlgorithmIdentifierOwned,
-    pub encap_content_info: EncapsulatedContentInfo<'a>,
+    pub encap_content_info: EncapsulatedContentInfo,
     pub digest: Digest,
 }
 

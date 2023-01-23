@@ -21,6 +21,7 @@ extern crate std;
 pub mod attr;
 pub mod authenticated_data;
 pub mod cert;
+pub mod compressed_data;
 pub mod content_info;
 pub mod digested_data;
 pub mod encrypted_data;

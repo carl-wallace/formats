@@ -216,13 +216,26 @@ dependencies = [
 ]
 
 [[package]]
-name = "cms"
-version = "0.1.0"
+name = "cmpv2"
+version = "0.0.0"
 dependencies = [
  "const-oid",
+ "crmf",
  "der",
  "flagset",
  "hex-literal",
+ "spki",
+ "x509-cert",
+]
+
+[[package]]
+name = "cms"
+version = "0.0.0"
+dependencies = [
+ "const-oid",
+ "der",
+ "hex-literal",
+ "pkcs5",
  "rstest 0.12.0",
  "spki",
  "x509-cert",
@@ -279,6 +292,15 @@ checksum = "6b50826342786a51a89e2da3a28f1c32b06e387201bc2d19791f622c673706b1"
 dependencies = [
  "cast",
  "itertools",
+]
+
+[[package]]
+name = "crmf"
+version = "0.0.0"
+dependencies = [
+ "der",
+ "spki",
+ "x509-cert",
 ]
 
 [[package]]
@@ -838,7 +860,6 @@ dependencies = [
  "der",
  "flagset",
  "hex-literal",
- "rstest 0.12.0",
  "spki",
  "x509-cert",
 ]

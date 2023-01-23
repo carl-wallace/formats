@@ -2,8 +2,8 @@
 use core::cmp::Ordering;
 
 use const_oid::ObjectIdentifier;
-use der::asn1::{GeneralizedTime, OctetString, SetOfVec};
-use der::{AnyRef, Choice, Sequence, ValueOrd};
+use der::asn1::{BitString, GeneralizedTime, OctetString, SetOfVec};
+use der::{Any, Choice, Sequence, ValueOrd};
 
 use spki::AlgorithmIdentifierOwned;
 use x509_cert::attr::{Attribute, Attributes};
@@ -31,24 +31,24 @@ use crate::signed_data::CertificateSet;
 /// [RFC 5652 Section 6.1]: https://www.rfc-editor.org/rfc/rfc5652#section-6.1
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
-pub struct EnvelopedData<'a> {
-    version: CmsVersion,
+pub struct EnvelopedData {
+    pub version: CmsVersion,
     #[asn1(
         context_specific = "0",
         tag_mode = "IMPLICIT",
         constructed = "true",
         optional = "true"
     )]
-    originator_info: Option<OriginatorInfo<'a>>,
-    recip_infos: RecipientInfos<'a>,
-    encrypted_content: EncryptedContentInfo,
+    pub originator_info: Option<OriginatorInfo>,
+    pub recip_infos: RecipientInfos,
+    pub encrypted_content: EncryptedContentInfo,
     #[asn1(
         context_specific = "1",
         tag_mode = "IMPLICIT",
         constructed = "true",
         optional = "true"
     )]
-    unprotected_attrs: Option<Attributes>,
+    pub unprotected_attrs: Option<Attributes>,
 }
 
 /// The `OriginatorInfo` type is defined in [RFC 5652 Section 6.1].
@@ -62,21 +62,21 @@ pub struct EnvelopedData<'a> {
 /// [RFC 5652 Section 6.1]: https://www.rfc-editor.org/rfc/rfc5652#section-6.1
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
-pub struct OriginatorInfo<'a> {
+pub struct OriginatorInfo {
     #[asn1(
         context_specific = "0",
         tag_mode = "IMPLICIT",
         constructed = "true",
         optional = "true"
     )]
-    certs: Option<CertificateSet<'a>>,
+    pub certs: Option<CertificateSet>,
     #[asn1(
         context_specific = "1",
         tag_mode = "IMPLICIT",
         constructed = "true",
         optional = "true"
     )]
-    crls: Option<RevocationInfoChoices<'a>>,
+    pub crls: Option<RevocationInfoChoices>,
 }
 
 /// The `RecipientInfos` type is defined in [RFC 5652 Section 6.1].
@@ -87,8 +87,8 @@ pub struct OriginatorInfo<'a> {
 ///
 /// [RFC 5652 Section 6.1]: https://www.rfc-editor.org/rfc/rfc5652#section-6.1
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct RecipientInfos<'a>(pub SetOfVec<RecipientInfo<'a>>);
-impl_newtype!(RecipientInfos<'a>, SetOfVec<RecipientInfo<'a>>);
+pub struct RecipientInfos(pub SetOfVec<RecipientInfo>);
+impl_newtype!(RecipientInfos, SetOfVec<RecipientInfo>);
 
 /// The `EncryptedContentInfo` type is defined in [RFC 5652 Section 6.1].
 ///
@@ -103,10 +103,10 @@ impl_newtype!(RecipientInfos<'a>, SetOfVec<RecipientInfo<'a>>);
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
 pub struct EncryptedContentInfo {
-    content_type: ObjectIdentifier,
-    content_enc_alg: AlgorithmIdentifierOwned,
+    pub content_type: ObjectIdentifier,
+    pub content_enc_alg: AlgorithmIdentifierOwned,
     #[asn1(context_specific = "0", tag_mode = "IMPLICIT", optional = "true")]
-    encrypted_content: Option<OctetString>,
+    pub encrypted_content: Option<OctetString>,
 }
 
 /// The `RecipientInfo` type is defined in [RFC 5652 Section 6.2].
@@ -124,18 +124,19 @@ pub struct EncryptedContentInfo {
 /// [RFC 5652 Section 6.2]: https://www.rfc-editor.org/rfc/rfc5652#section-6.2
 #[derive(Clone, Debug, Eq, PartialEq, Choice)]
 #[allow(missing_docs)]
-pub enum RecipientInfo<'a> {
-    Ktri(KeyTransRecipientInfo<'a>),
+pub enum RecipientInfo {
+    Ktri(KeyTransRecipientInfo),
     #[asn1(context_specific = "1", tag_mode = "IMPLICIT", constructed = "true")]
-    Kari(KeyAgreeRecipientInfo<'a>),
+    Kari(KeyAgreeRecipientInfo),
     #[asn1(context_specific = "2", tag_mode = "IMPLICIT", constructed = "true")]
-    Kekri(KEKRecipientInfo),
+    Kekri(KekRecipientInfo),
     #[asn1(context_specific = "3", tag_mode = "IMPLICIT", constructed = "true")]
     Pwri(PasswordRecipientInfo),
     #[asn1(context_specific = "4", tag_mode = "IMPLICIT", constructed = "true")]
-    Ori(OtherRecipientInfo<'a>),
+    Ori(OtherRecipientInfo),
 }
-impl<'a> ValueOrd for RecipientInfo<'a> {
+
+impl ValueOrd for RecipientInfo {
     fn value_cmp(&self, other: &Self) -> der::Result<Ordering> {
         use der::DerOrd;
         use der::Encode;
@@ -166,11 +167,11 @@ pub type EncryptedKey = OctetString;
 /// [RFC 5652 Section 6.2.1]: https://www.rfc-editor.org/rfc/rfc5652#section-6.2.1
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
-pub struct KeyTransRecipientInfo<'a> {
-    version: CmsVersion,
-    rid: RecipientIdentifier<'a>,
-    key_enc_alg: AlgorithmIdentifierOwned,
-    enc_key: EncryptedKey,
+pub struct KeyTransRecipientInfo {
+    pub version: CmsVersion,
+    pub rid: RecipientIdentifier,
+    pub key_enc_alg: AlgorithmIdentifierOwned,
+    pub enc_key: EncryptedKey,
 }
 
 /// The `RecipientIdentifier` type is defined in [RFC 5652 Section 6.2.1].
@@ -185,8 +186,8 @@ pub struct KeyTransRecipientInfo<'a> {
 /// [RFC 5652 Section 6.2.1]: https://www.rfc-editor.org/rfc/rfc5652#section-6.2.1
 #[derive(Clone, Debug, Eq, PartialEq, Choice)]
 #[allow(missing_docs)]
-pub enum RecipientIdentifier<'a> {
-    IssuerAndSerialNumber(IssuerAndSerialNumber<'a>),
+pub enum RecipientIdentifier {
+    IssuerAndSerialNumber(IssuerAndSerialNumber),
 
     #[asn1(context_specific = "0", tag_mode = "IMPLICIT")]
     SubjectKeyIdentifier(SubjectKeyIdentifier),
@@ -207,13 +208,14 @@ pub enum RecipientIdentifier<'a> {
 /// [RFC 5652 Section 6.2.2]: https://www.rfc-editor.org/rfc/rfc5652#section-6.2.2
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
-pub struct KeyAgreeRecipientInfo<'a> {
-    version: CmsVersion,
+pub struct KeyAgreeRecipientInfo {
+    pub version: CmsVersion,
     #[asn1(context_specific = "0", tag_mode = "EXPLICIT")]
-    originator: OriginatorIdentifierOrKey<'a>,
-    #[asn1(context_specific = "1", tag_mode = "EXPLICIT")]
-    ukm: UserKeyingMaterial,
-    key_enc_alg: AlgorithmIdentifierOwned,
+    pub originator: OriginatorIdentifierOrKey,
+    #[asn1(context_specific = "1", tag_mode = "EXPLICIT", optional = "true")]
+    pub ukm: Option<UserKeyingMaterial>,
+    pub key_enc_alg: AlgorithmIdentifierOwned,
+    pub recipient_enc_keys: RecipientEncryptedKeys,
 }
 
 /// The `OriginatorIdentifierOrKey` type is defined in [RFC 5652 Section 6.2.2].
@@ -228,11 +230,11 @@ pub struct KeyAgreeRecipientInfo<'a> {
 /// [RFC 5652 Section 6.2.2]: https://www.rfc-editor.org/rfc/rfc5652#section-6.2.2
 #[derive(Clone, Debug, Eq, PartialEq, Choice)]
 #[allow(missing_docs)]
-pub enum OriginatorIdentifierOrKey<'a> {
-    IssuerAndSerialNumber(IssuerAndSerialNumber<'a>),
+pub enum OriginatorIdentifierOrKey {
+    IssuerAndSerialNumber(IssuerAndSerialNumber),
     #[asn1(context_specific = "0", tag_mode = "IMPLICIT")]
     SubjectKeyIdentifier(SubjectKeyIdentifier),
-    #[asn1(context_specific = "1", tag_mode = "IMPLICIT")]
+    #[asn1(context_specific = "1", tag_mode = "IMPLICIT", constructed = "true")]
     OriginatorKey(OriginatorPublicKey),
 }
 
@@ -248,7 +250,8 @@ pub enum OriginatorIdentifierOrKey<'a> {
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
 pub struct OriginatorPublicKey {
-    placeholder: AlgorithmIdentifierOwned,
+    pub algorithm: AlgorithmIdentifierOwned,
+    pub public_key: BitString,
 }
 
 /// The `RecipientEncryptedKeys` type is defined in [RFC 5652 Section 6.2.2].
@@ -258,7 +261,7 @@ pub struct OriginatorPublicKey {
 /// ```
 ///
 /// [RFC 5652 Section 6.2.2]: https://www.rfc-editor.org/rfc/rfc5652#section-6.2.2
-pub type RecipientEncryptedKeys<'a> = alloc::vec::Vec<RecipientEncryptedKey<'a>>;
+pub type RecipientEncryptedKeys = alloc::vec::Vec<RecipientEncryptedKey>;
 
 /// The `RecipientEncryptedKey` type is defined in [RFC 5652 Section 6.2.2].
 ///
@@ -271,9 +274,9 @@ pub type RecipientEncryptedKeys<'a> = alloc::vec::Vec<RecipientEncryptedKey<'a>>
 /// [RFC 5652 Section 6.2.2]: https://www.rfc-editor.org/rfc/rfc5652#section-6.2.2
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
-pub struct RecipientEncryptedKey<'a> {
-    rid: KeyAgreeRecipientIdentifier<'a>,
-    enc_key: EncryptedKey,
+pub struct RecipientEncryptedKey {
+    pub rid: KeyAgreeRecipientIdentifier,
+    pub enc_key: EncryptedKey,
 }
 
 /// The `KeyAgreeRecipientIdentifier` type is defined in [RFC 5652 Section 6.2.2].
@@ -287,8 +290,8 @@ pub struct RecipientEncryptedKey<'a> {
 /// [RFC 5652 Section 6.2.2]: https://www.rfc-editor.org/rfc/rfc5652#section-6.2.2
 #[derive(Clone, Debug, Eq, PartialEq, Choice)]
 #[allow(missing_docs)]
-pub enum KeyAgreeRecipientIdentifier<'a> {
-    IssuerAndSerialNumber(IssuerAndSerialNumber<'a>),
+pub enum KeyAgreeRecipientIdentifier {
+    IssuerAndSerialNumber(IssuerAndSerialNumber),
     #[asn1(context_specific = "0", tag_mode = "IMPLICIT")]
     RKeyId(RecipientKeyIdentifier),
 }
@@ -306,9 +309,9 @@ pub enum KeyAgreeRecipientIdentifier<'a> {
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
 pub struct RecipientKeyIdentifier {
-    subject_key_identifier: SubjectKeyIdentifier,
-    date: Option<GeneralizedTime>,
-    other: Option<Attribute>,
+    pub subject_key_identifier: SubjectKeyIdentifier,
+    pub date: Option<GeneralizedTime>,
+    pub other: Option<Attribute>,
 }
 
 //   SubjectKeyIdentifier ::= OCTET STRING
@@ -327,10 +330,11 @@ pub struct RecipientKeyIdentifier {
 /// [RFC 5652 Section 6.2.3]: https://www.rfc-editor.org/rfc/rfc5652#section-6.2.3
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
-pub struct KEKRecipientInfo {
-    version: CmsVersion,
-    kek_id: KekIdentifier,
-    key_enc_alg: AlgorithmIdentifierOwned,
+pub struct KekRecipientInfo {
+    pub version: CmsVersion,
+    pub kek_id: KekIdentifier,
+    pub key_enc_alg: AlgorithmIdentifierOwned,
+    pub encrypted_key: EncryptedKey,
 }
 
 /// The `KEKIdentifier` type is defined in [RFC 5652 Section 6.2.3].
@@ -346,9 +350,9 @@ pub struct KEKRecipientInfo {
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
 pub struct KekIdentifier {
-    kek_identifier: OctetString,
-    date: Option<GeneralizedTime>,
-    other: Option<Attribute>,
+    pub kek_identifier: OctetString,
+    pub date: Option<GeneralizedTime>,
+    pub other: Option<Attribute>,
 }
 
 /// The `PasswordRecipientInfo` type is defined in [RFC 5652 Section 6.2.4].
@@ -369,7 +373,7 @@ pub struct PasswordRecipientInfo {
     pub version: CmsVersion,
     #[asn1(
         context_specific = "0",
-        tag_mode = "EXPLICIT",
+        tag_mode = "IMPLICIT",
         constructed = "true",
         optional = "true"
     )]
@@ -391,9 +395,9 @@ pub struct PasswordRecipientInfo {
 /// [RFC 5652 Section 6.2.5]: https://www.rfc-editor.org/rfc/rfc5652#section-6.2.5
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
-pub struct OtherRecipientInfo<'a> {
+pub struct OtherRecipientInfo {
     pub ori_type: ObjectIdentifier,
-    pub ori_value: AnyRef<'a>,
+    pub ori_value: Any,
 }
 
 /// The `UserKeyingMaterial` type is defined in [RFC 5652 Section 10.2.6].

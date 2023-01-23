@@ -3,7 +3,7 @@ use core::cmp::Ordering;
 
 use const_oid::ObjectIdentifier;
 
-use der::{AnyRef, Enumerated, Sequence, ValueOrd};
+use der::{Any, Enumerated, Sequence, ValueOrd};
 
 /// The `OtherCertificateFormat` type is defined in [RFC 5652 Section 10.2.5].
 ///
@@ -25,18 +25,9 @@ pub enum CmsVersion {
     V5 = 5,
 }
 
-// TODO DEFER ValueOrd procedural macro appears not to work for enums
 impl ValueOrd for CmsVersion {
     fn value_cmp(&self, other: &Self) -> der::Result<Ordering> {
-        #[allow(unused_imports)]
-        use ::der::DerOrd;
-        if self == other {
-            Ok(::core::cmp::Ordering::Equal)
-        } else if self < other {
-            Ok(::core::cmp::Ordering::Less)
-        } else {
-            Ok(::core::cmp::Ordering::Greater)
-        }
+        (*self as u8).value_cmp(&(*other as u8))
     }
 }
 
@@ -53,8 +44,8 @@ impl ValueOrd for CmsVersion {
 /// [RFC 5652 Section 3]: https://www.rfc-editor.org/rfc/rfc5652#section-3
 #[derive(Clone, Debug, Eq, PartialEq, Sequence)]
 #[allow(missing_docs)]
-pub struct ContentInfo<'a> {
+pub struct ContentInfo {
     pub content_type: ObjectIdentifier,
     #[asn1(context_specific = "0", tag_mode = "EXPLICIT")]
-    pub content: AnyRef<'a>,
+    pub content: Any,
 }
