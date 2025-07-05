@@ -59,5 +59,8 @@ x509-tsp = { path = "./x509-tsp" }
 x509-cert = { path = "./x509-cert" }
 x509-ocsp = { path = "./x509-ocsp" }
 
+crypto-bigint = { git = "https://github.com/RustCrypto/crypto-bigint.git" }
+primefield = { git = "https://github.com/RustCrypto/elliptic-curves.git" }
+
 elliptic-curve = { git = "https://github.com/RustCrypto/traits.git" }
 ecdsa = { git = "https://github.com/RustCrypto/signatures.git" }
